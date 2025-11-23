@@ -1,0 +1,5 @@
+{
+  "name": "FinGen AI",
+  "description": "AI-powered financial test data generator. Create synthetic beneficiary data for various countries and research banking formats using Google Search grounding.",
+  "requestFramePermissions": []
+}

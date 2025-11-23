@@ -1,0 +1,171 @@
+
+<div class="max-w-3xl mx-auto">
+  <div class="text-center mb-10">
+    <h2 class="text-2xl font-bold text-slate-900">IBAN Validator</h2>
+    <p class="mt-2 text-slate-600">
+      Validate International Bank Account Numbers. Checks format, checksum digits, and bank details using public records (with AI fallback).
+    </p>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg flex items-start">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-red-700">{{ error() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Search Bar -->
+  <div class="relative shadow-sm rounded-xl mb-10">
+    <div class="relative flex items-center">
+      <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+         <span class="text-slate-400 font-mono font-bold">IBAN</span>
+      </div>
+      <input 
+        type="text" 
+        [(ngModel)]="ibanInput"
+        (keyup.enter)="validate()"
+        placeholder="e.g. IE12 BOFI 9000 1012 3456 78"
+        class="block w-full rounded-xl border-0 py-4 pl-16 pr-32 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg shadow-lg font-mono uppercase"
+      >
+      <div class="absolute inset-y-0 right-0 flex py-2 pr-2">
+        <button 
+          (click)="validate()"
+          [disabled]="isLoading() || !ibanInput()"
+          class="inline-flex items-center rounded-lg bg-indigo-600 px-6 py-1 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          @if (isLoading()) {
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Checking...
+          } @else {
+            Validate
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  @if (result()) {
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transform transition-all">
+      <!-- Header Status -->
+      <div class="px-6 py-6 border-b border-slate-100 flex items-center justify-between"
+           [class.bg-green-50]="result()!.isValid"
+           [class.bg-red-50]="!result()!.isValid">
+        <div class="flex items-center gap-4">
+          <div class="flex-shrink-0">
+             @if (result()!.isValid) {
+               <div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                 <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                 </svg>
+               </div>
+             } @else {
+               <div class="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                 <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                 </svg>
+               </div>
+             }
+          </div>
+          <div>
+            <h3 class="text-lg font-bold" 
+                [class.text-green-800]="result()!.isValid"
+                [class.text-red-800]="!result()!.isValid">
+              {{ result()!.isValid ? 'Valid IBAN' : 'Invalid IBAN' }}
+            </h3>
+            <p class="text-sm font-mono text-slate-600">{{ result()!.iban }}</p>
+          </div>
+        </div>
+        
+        <div class="text-right">
+           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                 [class.bg-green-100]="result()!.isValid"
+                 [class.text-green-800]="result()!.isValid"
+                 [class.bg-red-100]="!result()!.isValid"
+                 [class.text-red-800]="!result()!.isValid">
+             {{ result()!.source }} Source
+           </span>
+        </div>
+      </div>
+
+      <!-- Bank Details Table -->
+      <div class="p-6">
+         <h3 class="text-lg font-bold text-slate-900 mb-4">Bank details</h3>
+         
+         <div class="border border-slate-200 rounded-lg overflow-hidden">
+           <table class="min-w-full divide-y divide-slate-200">
+             <tbody class="divide-y divide-slate-200 bg-white">
+               <tr>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500 w-1/4">BANK</td>
+                 <td class="px-6 py-4 text-sm text-slate-900">{{ result()!.bankName || '-' }}</td>
+               </tr>
+               <tr>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500">BIC</td>
+                 <td class="px-6 py-4 text-sm text-slate-900 font-mono">{{ result()!.bic || '-' }}</td>
+               </tr>
+               <tr>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500">BRANCH</td>
+                 <td class="px-6 py-4 text-sm text-slate-900">{{ result()!.branch || '-' }}</td>
+               </tr>
+               <tr>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500">ADDRESS</td>
+                 <td class="px-6 py-4 text-sm text-slate-900">{{ result()!.address || '-' }}</td>
+               </tr>
+               <tr>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500">CITY</td>
+                 <td class="px-6 py-4 text-sm text-slate-900">{{ result()!.city || '-' }}</td>
+               </tr>
+               <tr>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500">ZIP</td>
+                 <td class="px-6 py-4 text-sm text-slate-900">{{ result()!.zip || '-' }}</td>
+               </tr>
+               <tr>
+                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500">COUNTRY</td>
+                 <td class="px-6 py-4 text-sm text-slate-900">{{ result()!.country || '-' }}</td>
+               </tr>
+             </tbody>
+           </table>
+         </div>
+
+         @if(result()!.details || (result()!.messages && result()!.messages!.length > 0)) {
+           <div class="mt-6 bg-slate-50 rounded-lg p-4 border border-slate-100">
+             <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Analysis</h4>
+             @if (result()!.details) {
+               <p class="text-sm text-slate-700 leading-relaxed">{{ result()!.details }}</p>
+             }
+             
+             @if (result()!.messages && result()!.messages!.length > 0) {
+               <ul class="space-y-1 mt-2">
+                 @for (msg of result()!.messages; track $index) {
+                   <li class="text-sm flex items-start text-slate-700">
+                     <span class="text-indigo-500 mr-2">•</span> {{ msg }}
+                   </li>
+                 }
+               </ul>
+             }
+           </div>
+         }
+      </div>
+    </div>
+  } @else if (isLoading()) {
+    <div class="animate-pulse space-y-4 max-w-2xl mx-auto mt-8">
+      <div class="h-20 bg-slate-100 rounded-xl"></div>
+      <div class="border border-slate-200 rounded-xl overflow-hidden">
+        <div class="h-12 bg-slate-50 border-b border-slate-200"></div>
+        <div class="h-12 bg-white border-b border-slate-200"></div>
+        <div class="h-12 bg-white border-b border-slate-200"></div>
+        <div class="h-12 bg-white"></div>
+      </div>
+    </div>
+  }
+</div>

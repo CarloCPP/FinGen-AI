@@ -1,0 +1,72 @@
+
+<div class="min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 p-2 rounded-lg text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold text-slate-800 tracking-tight">FinGen AI</h1>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+          <input 
+            type="checkbox" 
+            id="aiToggle"
+            [ngModel]="settings.aiEnabled()" 
+            (ngModelChange)="settings.aiEnabled.set($event)"
+            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+          >
+          <label for="aiToggle" class="text-sm font-medium text-slate-700 cursor-pointer select-none">
+            Enable AI Features
+          </label>
+        </div>
+
+        <nav class="flex space-x-1 bg-slate-100 p-1 rounded-lg">
+          <button 
+            (click)="setTab('generator')"
+            class="px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            [class.bg-white]="activeTab() === 'generator'"
+            [class.text-indigo-600]="activeTab() === 'generator'"
+            [class.shadow-sm]="activeTab() === 'generator'"
+            [class.text-slate-500]="activeTab() !== 'generator'"
+          >
+            Data Generator
+          </button>
+          <button 
+            (click)="setTab('research')"
+            class="px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            [class.bg-white]="activeTab() === 'research'"
+            [class.text-indigo-600]="activeTab() === 'research'"
+            [class.shadow-sm]="activeTab() === 'research'"
+            [class.text-slate-500]="activeTab() !== 'research'"
+          >
+            IBAN Validator
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+    @if (activeTab() === 'generator') {
+      <app-generator></app-generator>
+    } @else {
+      <app-info-search></app-info-search>
+    }
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <p class="text-center text-sm text-slate-400">
+        Generated data is for testing purposes only. Research powered by Gemini 2.5 Flash.
+      </p>
+    </div>
+  </footer>
+</div>
