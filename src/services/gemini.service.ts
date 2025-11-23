@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { GoogleGenAI, Type } from '@google/genai';
 
-declare const process: any;
+declare var process: any;
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,14 @@ export class GeminiService {
   private modelName = 'gemini-2.5-flash';
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env['API_KEY'] });
+    let apiKey = '';
+    try {
+      // Use dot notation to allow build tools to replace process.env.API_KEY with the actual string
+      apiKey = process.env.API_KEY;
+    } catch (e) {
+      console.warn('API Key not found in environment variables');
+    }
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
   async researchBankingFormat(query: string): Promise<{ text: string, sources: string[] }> {
